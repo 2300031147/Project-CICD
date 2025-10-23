@@ -1,0 +1,50 @@
+.song-list {
+  margin-top: 20px;
+}
+
+.song-item {
+  display: grid;
+  grid-template-columns: 50px 3fr 2fr 100px;
+  gap: 20px;
+  padding: 12px 20px;
+  align-items: center;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.song-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.song-number {
+  color: #b3b3b3;
+  text-align: center;
+}
+
+.song-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.song-title {
+  color: white;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.song-artist {
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.song-album {
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.song-duration {
+  color: #b3b3b3;
+  text-align: right;
+  font-size: 14px;
+}
