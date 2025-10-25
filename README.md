@@ -240,7 +240,8 @@ This project is licensed under the MIT License.
 
 ## Authors
 
-- **Project Team** - [2300031147](https://github.com/2300031147)
+- **Project Lead** - [2300031147](https://github.com/2300031147)
+- **Project Team** - [2300030593](https://github.com/banny1708)
 
 ## Acknowledgments
 
