@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import songService from '../services/songService';
 import playlistService from '../services/playlistService';
-import artistService from '../services/artistService';
 import authService from '../services/authService';
 import MusicPlayer from '../components/MusicPlayer';
 import Sidebar from '../components/Sidebar';
