@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SongRepository extends JpaRepository<Song, Long> {
@@ -18,4 +19,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     List<Song> searchSongs(String keyword);
     
     List<Song> findTop10ByOrderByPlayCountDesc();
+    
+    Optional<Song> findByTitleAndArtist_Name(String title, String artistName);
 }

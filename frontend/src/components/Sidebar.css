@@ -33,6 +33,15 @@
   color: white;
 }
 
+.nav-item.admin-link {
+  color: #1db954;
+  font-weight: 600;
+}
+
+.nav-item.admin-link:hover {
+  color: #1ed760;
+}
+
 .sidebar-section {
   flex: 1;
   overflow-y: auto;

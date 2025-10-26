@@ -13,6 +13,14 @@ A full-featured music streaming platform similar to Spotify, built with **React.
 - **AI-Based Recommendations**: Get personalized song recommendations based on listening history
 - **Analytics**: Track play history and user engagement
 
+### ⚙️ Admin Features
+- **Admin Dashboard**: Comprehensive admin panel for managing the music library
+- **Song Management**: Add, edit, and delete songs manually
+- **Automatic Library Scanning**: Scan and import songs from a configured folder automatically
+- **Multi-Format Support**: Supports MP3, WAV, FLAC, AAC, M4A, AIFF, AIF, ALAC, OGG, WMA
+- **Metadata Extraction**: Automatically extracts title, artist, album, genre, and duration from audio files
+- **Library Statistics**: View total songs, artists, and library configuration
+
 ### 🔐 Authentication & Security
 - **JWT Authentication**: Secure token-based authentication
 - **OAuth Support**: OAuth2 resource server integration
@@ -74,6 +82,29 @@ A full-featured music streaming platform similar to Spotify, built with **React.
    ```bash
    docker-compose down
    ```
+
+## Admin Panel Access
+
+To access the admin panel:
+
+1. **Create an admin user**: You need to create a user with ADMIN role in the database. You can do this by:
+   - Registering a normal user through the UI
+   - Manually updating the user's role in the database:
+     ```sql
+     UPDATE users SET role = 'ADMIN' WHERE username = 'your_username';
+     ```
+
+2. **Login with admin credentials** at http://localhost:3000/login
+
+3. **Access admin panel**: After logging in, you'll see an "Admin Panel" option in the sidebar (only visible to admin users)
+
+4. **Admin Features**:
+   - View all songs in the library
+   - Add songs manually with metadata
+   - Edit existing songs
+   - Delete songs
+   - Scan and import songs from configured music folder
+   - View library statistics
 
 ## Local Development Setup
 
@@ -160,6 +191,15 @@ A full-featured music streaming platform similar to Spotify, built with **React.
 
 - `GET /api/recommendations` - Get personalized recommendations
 
+### Admin Endpoints (Require ADMIN role)
+
+- `GET /api/admin/songs` - Get all songs (admin view)
+- `POST /api/admin/songs` - Create new song
+- `PUT /api/admin/songs/{id}` - Update existing song
+- `DELETE /api/admin/songs/{id}` - Delete song
+- `POST /api/admin/library/scan` - Scan and import songs from configured library path
+- `GET /api/admin/library/stats` - Get library statistics
+
 ## Database Schema
 
 ### Users Table
@@ -192,7 +232,15 @@ jwt.expiration=86400000
 
 # File Upload
 spring.servlet.multipart.max-file-size=50MB
+
+# Music Library (for automatic scanning)
+music.library.path=/path/to/your/music/folder
+music.library.scan-on-startup=false
 ```
+
+**Note for Windows users**: Use forward slashes or double backslashes for the path, e.g.:
+- `music.library.path=C:/Users/YourName/Music/Project music`
+- Or with environment variable: `MUSIC_LIBRARY_PATH=C:/Users/YourName/Music/Project music`
 
 ### Frontend Environment Variables
 ```bash
