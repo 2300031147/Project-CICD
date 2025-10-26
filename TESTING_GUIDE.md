@@ -215,15 +215,22 @@ curl -X GET http://localhost:8080/api/admin/songs
    music.library.path=/home/user/Music
    ```
 
-2. **Windows Path**:
+2. **Windows Path (with spaces - using forward slashes)**:
    ```properties
    music.library.path=C:/Users/Username/Music/Project music
    ```
 
-3. **Environment Variable**:
+3. **Windows Path (with spaces - using escaped backslashes)**:
+   ```properties
+   music.library.path=C:\\Users\\Username\\Music\\Project music
+   ```
+
+4. **Environment Variable**:
    ```bash
    export MUSIC_LIBRARY_PATH=/path/to/music
    ```
+   
+   Note: Paths with spaces work correctly with both forward slashes and escaped backslashes. No additional quoting is required in application.properties.
 
 ---
 
