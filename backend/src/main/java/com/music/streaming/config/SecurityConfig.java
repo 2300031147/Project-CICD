@@ -68,6 +68,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/songs/top").permitAll()
                 .requestMatchers("/api/artists/search").permitAll()
                 .requestMatchers("/api/artists/top").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             );
 

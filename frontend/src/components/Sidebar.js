@@ -1,7 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import authService from '../services/authService';
 import './Sidebar.css';
 
 const Sidebar = ({ playlists, onViewChange, onLogout }) => {
+  const navigate = useNavigate();
+  const user = authService.getCurrentUser();
+  const isAdmin = user && user.role === 'ADMIN';
+
   return (
     <div className="sidebar">
       <div className="sidebar-header">
@@ -17,6 +23,11 @@ const Sidebar = ({ playlists, onViewChange, onLogout }) => {
         <button onClick={() => onViewChange('library')} className="nav-item">
           📚 Your Library
         </button>
+        {isAdmin && (
+          <button onClick={() => navigate('/admin')} className="nav-item admin-link">
+            ⚙️ Admin Panel
+          </button>
+        )}
       </nav>
       <div className="sidebar-section">
         <h3>Playlists</h3>
