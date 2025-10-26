@@ -56,6 +56,14 @@ public class User {
     )
     private Set<Artist> followingArtists = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+        name = "user_liked_songs",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "song_id")
+    )
+    private Set<Song> likedSongs = new HashSet<>();
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

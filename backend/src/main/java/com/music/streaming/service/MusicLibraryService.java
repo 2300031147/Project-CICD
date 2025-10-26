@@ -119,9 +119,8 @@ public class MusicLibraryService {
             String genre = getTagField(tag, FieldKey.GENRE, "Unknown");
             int duration = audioFile.getAudioHeader().getTrackLength();
 
-            // Check if song already exists
-            Optional<Song> existingSong = songRepository.findByTitleAndArtist_Name(title, artistName);
-            if (existingSong.isPresent()) {
+            // Check if song already exists with normalized comparison
+            if (isDuplicate(title, artistName)) {
                 logger.debug("Song already exists: {} by {}", title, artistName);
                 return false;
             }
@@ -210,6 +209,49 @@ public class MusicLibraryService {
         } catch (Exception e) {
             return defaultValue;
         }
+    }
+
+    /**
+     * Check if a song with the given title and artist already exists using normalized comparison.
+     * This helps avoid duplicates with slight variations in spelling, case, or special characters.
+     */
+    private boolean isDuplicate(String title, String artistName) {
+        String normalizedTitle = normalizeString(title);
+        String normalizedArtist = normalizeString(artistName);
+        
+        // Get all songs by the artist
+        Artist artist = artistRepository.findByName(artistName).orElse(null);
+        if (artist == null) {
+            return false;
+        }
+        
+        // Check if any existing song matches the normalized title
+        List<Song> existingSongs = songRepository.findByArtist(artist);
+        for (Song song : existingSongs) {
+            if (normalizeString(song.getTitle()).equals(normalizedTitle)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Normalize a string for comparison by:
+     * - Converting to lowercase
+     * - Removing extra whitespace
+     * - Removing special characters and punctuation
+     * - Trimming whitespace
+     */
+    private String normalizeString(String input) {
+        if (input == null) {
+            return "";
+        }
+        
+        return input.toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "") // Remove special characters
+                .replaceAll("\\s+", " ")        // Normalize whitespace
+                .trim();
     }
 
     public Map<String, Object> getLibraryStats() {

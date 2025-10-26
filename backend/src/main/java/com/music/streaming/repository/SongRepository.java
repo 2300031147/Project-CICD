@@ -1,5 +1,6 @@
 package com.music.streaming.repository;
 
+import com.music.streaming.model.Artist;
 import com.music.streaming.model.Song;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface SongRepository extends JpaRepository<Song, Long> {
     List<Song> findByArtistId(Long artistId);
+    List<Song> findByArtist(Artist artist);
     List<Song> findByGenre(String genre);
     
     @Query("SELECT s FROM Song s WHERE LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
