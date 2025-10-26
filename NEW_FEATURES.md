@@ -153,7 +153,8 @@ The system normalizes song titles and artist names by:
 4. Trimming leading/trailing whitespace
 
 #### Examples of Detected Duplicates
-- "Test Song" = "TEST SONG" = "test-song!" = "Test   Song"
+- "Test Song" = "TEST SONG" = "Test   Song"
+- "test-song!" = "testsong" = "TestSong"
 - "Artist's Name" = "Artists Name" = "ARTISTS NAME"
 - "Song (feat. Artist)" = "Song feat Artist"
 

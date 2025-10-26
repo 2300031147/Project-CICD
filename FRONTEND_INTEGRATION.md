@@ -115,12 +115,15 @@ const LikeButton = ({ songId, onLikeChange }) => {
       if (liked) {
         await unlikeSong(songId);
         setLiked(false);
+        if (onLikeChange) {
+          onLikeChange(false);
+        }
       } else {
         await likeSong(songId);
         setLiked(true);
-      }
-      if (onLikeChange) {
-        onLikeChange(liked);
+        if (onLikeChange) {
+          onLikeChange(true);
+        }
       }
     } catch (error) {
       console.error('Error toggling like:', error);
