@@ -1,10 +1,10 @@
-# Music Streaming Platform 🎵
+# Music Streaming Platform 
 
 A full-featured music streaming platform similar to Spotify, built with **React.js** frontend and **Spring Boot** backend, using **MySQL** database.
 
 ## Features
 
-### 🎧 Core Features
+### Core Features
 - **Music Streaming**: Play, pause, and control music playback
 - **Search**: Find songs, artists, and albums
 - **Download**: Download songs for offline listening
@@ -13,7 +13,7 @@ A full-featured music streaming platform similar to Spotify, built with **React.
 - **AI-Based Recommendations**: Get personalized song recommendations based on listening history
 - **Analytics**: Track play history and user engagement
 
-### ⚙️ Admin Features
+### Admin Features
 - **Admin Dashboard**: Comprehensive admin panel for managing the music library
 - **Song Management**: Add, edit, and delete songs manually
 - **Automatic Library Scanning**: Scan and import songs from a configured folder automatically
@@ -21,13 +21,13 @@ A full-featured music streaming platform similar to Spotify, built with **React.
 - **Metadata Extraction**: Automatically extracts title, artist, album, genre, and duration from audio files
 - **Library Statistics**: View total songs, artists, and library configuration
 
-### 🔐 Authentication & Security
+### Authentication & Security
 - **JWT Authentication**: Secure token-based authentication
 - **OAuth Support**: OAuth2 resource server integration
 - **Password Encryption**: BCrypt password hashing
 - **Role-Based Access Control**: User, Artist, and Admin roles
 
-### 🎨 User Interface
+### User Interface
 - **Spotify-like Design**: Modern, responsive UI inspired by Spotify
 - **Music Player**: Bottom-fixed player with playback controls
 - **Search Bar**: Real-time search functionality
