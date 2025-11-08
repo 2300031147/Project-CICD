@@ -2,6 +2,8 @@ package com.music.streaming.controller;
 
 import com.music.streaming.dto.MessageResponse;
 import com.music.streaming.dto.SongDTO;
+import com.music.streaming.model.User;
+import com.music.streaming.repository.UserRepository;
 import com.music.streaming.service.MusicLibraryService;
 import com.music.streaming.service.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ public class AdminController {
 
     @Autowired
     private MusicLibraryService musicLibraryService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/songs")
     public ResponseEntity<List<SongDTO>> getAllSongs() {
@@ -58,5 +63,28 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> getLibraryStats() {
         Map<String, Object> stats = musicLibraryService.getLibraryStats();
         return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userRepository.findAll());
+    }
+
+    @PostMapping("/users/{username}/promote")
+    public ResponseEntity<MessageResponse> promoteToAdmin(@PathVariable String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setRole(User.Role.ADMIN);
+        userRepository.save(user);
+        return ResponseEntity.ok(new MessageResponse("User promoted to ADMIN"));
+    }
+
+    @PostMapping("/users/{username}/demote")
+    public ResponseEntity<MessageResponse> demoteFromAdmin(@PathVariable String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setRole(User.Role.USER);
+        userRepository.save(user);
+        return ResponseEntity.ok(new MessageResponse("User demoted to USER"));
     }
 }
