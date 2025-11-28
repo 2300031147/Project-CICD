@@ -1,23 +1,25 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ namespace }}
+  name: music-platform
 
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
-  name: music-config
-  namespace: {{ namespace }}
-data:
-  REACT_APP_API_URL: "http://music-backend.{{ namespace }}.svc.cluster.local:8080/api"
+  name: music-secrets
+  namespace: music-platform
+type: Opaque
+stringData:
+  MYSQL_ROOT_PASSWORD: "1108"
+  JWT_SECRET: "change-me-to-a-secure-value"
 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pvc
-  namespace: {{ namespace }}
+  namespace: music-platform
 spec:
   accessModes:
     - ReadWriteOnce
@@ -30,7 +32,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
-  namespace: {{ namespace }}
+  namespace: music-platform
+  labels:
+    app: mysql
 spec:
   replicas: 1
   selector:
@@ -46,9 +50,12 @@ spec:
           image: mysql:8.0
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: "{{ mysql_root_password }}"
+              valueFrom:
+                secretKeyRef:
+                  name: music-secrets
+                  key: MYSQL_ROOT_PASSWORD
             - name: MYSQL_DATABASE
-              value: "{{ mysql_database }}"
+              value: musicdb
           ports:
             - containerPort: 3306
           volumeMounts:
@@ -64,22 +71,24 @@ apiVersion: v1
 kind: Service
 metadata:
   name: music-mysql
-  namespace: {{ namespace }}
+  namespace: music-platform
+  labels:
+    app: mysql
 spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
   selector:
     app: mysql
-  ports:
-    - protocol: TCP
-      port: 3306
-      targetPort: 3306
-  clusterIP: None
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: music-backend
-  namespace: {{ namespace }}
+  namespace: music-platform
+  labels:
+    app: music-backend
 spec:
   replicas: 1
   selector:
@@ -91,42 +100,61 @@ spec:
         app: music-backend
     spec:
       containers:
-        - name: backend
-          image: {{ backend_image_name }}
-          imagePullPolicy: {{ (push_images | bool) | ternary('IfNotPresent','IfNotPresent') }}
+        - name: music-backend
+          image: rithesh11/streaming-backend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           env:
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://music-mysql.{{ namespace }}.svc.cluster.local:3306/{{ mysql_database }}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+              value: "jdbc:mysql://music-mysql.music-platform.svc.cluster.local:3306/musicdb"
             - name: SPRING_DATASOURCE_USERNAME
-              value: {{ mysql_user }}
+              value: "root"
             - name: SPRING_DATASOURCE_PASSWORD
-              value: {{ mysql_password }}
-            - name: jwt.secret
-              value: {{ jwt_secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: music-secrets
+                  key: MYSQL_ROOT_PASSWORD
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "update"
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: music-backend
-  namespace: {{ namespace }}
+  namespace: music-platform
+  labels:
+    app: music-backend
 spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
   selector:
     app: music-backend
+
+---
+# Extra service named `backend` so nginx upstream resolves to it
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: music-platform
+spec:
   ports:
-    - protocol: TCP
-      port: 8080
+    - port: 8080
       targetPort: 8080
-  type: ClusterIP
+  selector:
+    app: music-backend
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: music-frontend
-  namespace: {{ namespace }}
+  namespace: music-platform
+  labels:
+    app: music-frontend
 spec:
   replicas: 1
   selector:
@@ -138,26 +166,23 @@ spec:
         app: music-frontend
     spec:
       containers:
-        - name: frontend
-          image: {{ frontend_image_name }}
-          imagePullPolicy: {{ (push_images | bool) | ternary('IfNotPresent','IfNotPresent') }}
+        - name: music-frontend
+          image: rithesh11/streaming-frontend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
-          envFrom:
-            - configMapRef:
-                name: music-config
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: music-frontend
-  namespace: {{ namespace }}
+  namespace: music-platform
+  labels:
+    app: music-frontend
 spec:
+  ports:
+    - port: 80
+      targetPort: 80
   selector:
     app: music-frontend
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
-  type: ClusterIP
