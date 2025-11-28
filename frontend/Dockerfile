@@ -9,8 +9,8 @@ RUN apk add --no-cache python3 make g++ bash
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files first (for Docker caching)
-COPY package.json package-lock.json ./
+# Copy dependency files first (for Docker caching). Use a glob so a missing lockfile doesn't fail.
+COPY package*.json ./
 
 # Clean install to avoid corrupt lock states or partial installs
 RUN npm install --no-audit --no-fund

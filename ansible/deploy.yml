@@ -1,0 +1,52 @@
+---
+- name: Build images and deploy Kubernetes manifests for Music Streaming Platform
+  hosts: k8s
+  connection: local
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Ensure kubectl is installed
+      ansible.builtin.command: kubectl version --client
+      register: kubectl_check
+      changed_when: false
+
+    - name: Build backend Docker image
+      ansible.builtin.command:
+        cmd: >-
+          docker build -t {{ backend_image_name }} ./backend
+      args:
+        chdir: "{{ playbook_dir }}"
+
+    - name: Build frontend Docker image
+      ansible.builtin.command:
+        cmd: >-
+          docker build -t {{ frontend_image_name }} ./frontend
+      args:
+        chdir: "{{ playbook_dir }}"
+
+    - name: Push backend image (optional)
+      ansible.builtin.command: docker push {{ backend_image_name }}
+      when: push_images | bool
+
+    - name: Push frontend image (optional)
+      ansible.builtin.command: docker push {{ frontend_image_name }}
+      when: push_images | bool
+
+    - name: Create rendered manifests directory
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/ansible/rendered"
+        state: directory
+
+    - name: Render merged template into rendered/all-in-one.yaml
+      ansible.builtin.template:
+        src: 'templates/all-in-one.yaml.j2'
+        dest: "{{ playbook_dir }}/ansible/rendered/all-in-one.yaml"
+
+    - name: Apply rendered Kubernetes manifests
+      ansible.builtin.command: kubectl apply -f {{ playbook_dir }}/ansible/rendered --namespace {{ namespace }}
+
+    - name: Wait for backend rollout
+      ansible.builtin.command: kubectl rollout status deployment/music-backend -n {{ namespace }} --timeout=120s
+
+    - name: Wait for frontend rollout
+      ansible.builtin.command: kubectl rollout status deployment/music-frontend -n {{ namespace }} --timeout=120s

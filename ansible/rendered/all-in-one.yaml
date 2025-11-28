@@ -1,0 +1,164 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: music-platform
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: music-config
+  namespace: music-platform
+data:
+  REACT_APP_API_URL: "http://music-backend.music-platform.svc.cluster.local:8080/api"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: music-platform
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: music-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "1108"
+            - name: MYSQL_DATABASE
+              value: "musicdb"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: music-mysql
+  namespace: music-platform
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  clusterIP: None
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: music-backend
+  namespace: music-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: music-backend
+  template:
+    metadata:
+      labels:
+        app: music-backend
+    spec:
+      containers:
+        - name: backend
+          image: streaming-backend:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://music-mysql.music-platform.svc.cluster.local:3306/musicdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "1108"
+            - name: jwt.secret
+              value: "secure-jwt-secret-please-change"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: music-backend
+  namespace: music-platform
+spec:
+  selector:
+    app: music-backend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: music-frontend
+  namespace: music-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: music-frontend
+  template:
+    metadata:
+      labels:
+        app: music-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: streaming-frontend:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: music-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: music-frontend
+  namespace: music-platform
+spec:
+  selector:
+    app: music-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
